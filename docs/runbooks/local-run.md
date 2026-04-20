@@ -14,6 +14,13 @@ swift test
 swift run MacWhip --self-check
 ```
 
+## 릴리스 패키징
+
+```bash
+zsh scripts/build_release_app.sh
+zsh scripts/package_release_zip.sh
+```
+
 ## 수동 검증 포인트
 
 1. 메뉴바 아이콘 표시

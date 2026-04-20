@@ -18,6 +18,7 @@
 - IOKit 기반 물리 감지 adapter 추가
 - `CGEvent` 기반 keyboard macro sender 추가
 - self-check 기반 자동 검증 / CI workflow 추가
+- 릴리스용 `.app` 번들 및 ZIP 패키징 스크립트 추가
 - README / AGENTS / architecture docs 추가
 
 ## 설계 이유
@@ -34,15 +35,15 @@
 - `swift build`
 - `swift test`
 - `swift run MacWhip --self-check`
+- `zsh scripts/package_release_zip.sh`
 - 수동 메뉴바 실행 및 슬랩 테스트 검증
 
 ## 남아 있는 한계
 
-- signed app bundle 및 release artifact 부재
 - 물리 센서 미지원 하드웨어 fallback 제한
+- notarization/signing 미적용
 
 ## 후속 과제
 
-- app bundle packaging
 - notarization/signing
 - supported terminal bundle ID 보완

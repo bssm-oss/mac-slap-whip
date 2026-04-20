@@ -11,6 +11,8 @@ swift build
 swift test
 swift run MacWhip
 swift run MacWhip --self-check
+zsh scripts/build_release_app.sh
+zsh scripts/package_release_zip.sh
 ```
 
 ## 설치 / 실행 / 테스트 명령
@@ -19,6 +21,8 @@ swift run MacWhip --self-check
 - 자동 테스트: `swift test`
 - 앱 실행: `swift run MacWhip`
 - 셀프 체크: `swift run MacWhip --self-check`
+- 릴리스 앱 번들: `zsh scripts/build_release_app.sh`
+- 릴리스 ZIP: `zsh scripts/package_release_zip.sh`
 
 ## 기본 작업 순서
 
@@ -37,6 +41,7 @@ swift run MacWhip --self-check
 - `swift build` 통과
 - `swift test` 통과
 - `swift run MacWhip --self-check` 통과
+- 필요 시 `zsh scripts/package_release_zip.sh` 통과
 - 핵심 수동 검증 수행
 - README / docs / AGENTS 최신 상태 유지
 
@@ -92,6 +97,7 @@ swift run MacWhip --self-check
 - `swift build`
 - `swift test`
 - `swift run MacWhip --self-check`
+- 필요 시 `zsh scripts/package_release_zip.sh`
 - 수동 검증 수행
 - 문서 업데이트 확인
 
