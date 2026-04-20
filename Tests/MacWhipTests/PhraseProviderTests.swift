@@ -11,4 +11,11 @@ import Testing
         let phrase = PhraseProvider.phrase(for: "custom", customPhrase: "hello")
         #expect(phrase == "hello")
     }
+
+    @Test func targetDefaultsMapToPresetAndMode() {
+        #expect(AgentTarget.claude.defaultPresetID == "replan")
+        #expect(AgentTarget.codex.defaultPresetID == "focus")
+        #expect(AgentTarget.opencode.defaultPresetID == "slow-path")
+        #expect(AgentTarget.custom.defaultActionMode == .promptOnly)
+    }
 }

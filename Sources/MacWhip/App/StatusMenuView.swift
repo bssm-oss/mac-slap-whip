@@ -30,6 +30,10 @@ struct StatusMenuView: View {
                         }
                     }
 
+                    Text(appState.target.guidanceText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
                     Toggle("포커스 앱 제한 해제", isOn: $appState.allowAnyFocusedApp)
                         .font(.caption)
                 }
