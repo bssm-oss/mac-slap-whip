@@ -17,5 +17,8 @@ jobs:
       - name: Build
         run: swift build
 
+      - name: Test
+        run: swift test
+
       - name: Self check
         run: swift run MacWhip --self-check

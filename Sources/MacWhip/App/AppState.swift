@@ -192,7 +192,7 @@ final class AppState: ObservableObject {
                     intensity: event.intensity,
                     target: target,
                     actionMode: actionMode,
-                    frontmostApp: lastExternalTarget?.name ?? "Unknown App",
+                    frontmostApp: frontmostAppDetector.current()?.name ?? lastExternalTarget?.name ?? "Unknown App",
                     success: false,
                     failureReason: error.localizedDescription
                 )
