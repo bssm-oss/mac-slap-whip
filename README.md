@@ -179,7 +179,6 @@ GitHub Actions에서 다음을 실행합니다.
 
 - detector availability를 더 세밀하게 표시
 - supported terminal bundle ID 확장
-- signed app bundle 및 릴리스 아티팩트 제공
 - notarization/signing 적용
 
 ## 기여 방법

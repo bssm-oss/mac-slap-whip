@@ -7,12 +7,16 @@ import SwiftUI
 final class AppState: ObservableObject {
     @Published var isListening = false
     @Published var status: AppStatus = .idle
-    @Published var target: AgentTarget = .activeTerminal
+    @Published var target: AgentTarget = .activeTerminal {
+        didSet {
+            applyTargetDefaults()
+        }
+    }
     @Published var actionMode: ActionMode = .interruptAndPrompt
     @Published var sensitivity: Double = 0.12
     @Published var cooldown: Double = 0.9
     @Published var allowAnyFocusedApp = false
-    @Published var selectedPresetID = PhraseProvider.presets[0].id
+    @Published var selectedPresetID = AgentTarget.activeTerminal.defaultPresetID
     @Published var customPhrase = ""
     @Published var accessibilityGranted = false
     @Published var detectorStatusText = "미확인"
@@ -42,6 +46,7 @@ final class AppState: ObservableObject {
         self.keyboardSender = keyboardSender
         self.hudController = hudController
         self.recentEventsController = recentEventsController ?? RecentEventsWindowController(eventLogStore: eventLogStore)
+        applyTargetDefaults()
         refreshPermissions()
         refreshDetectorStatus()
     }
@@ -130,6 +135,15 @@ final class AppState: ObservableObject {
 
     func refreshDetectorStatus() {
         detectorStatusText = "대기 중"
+    }
+
+    private func applyTargetDefaults() {
+        actionMode = target.defaultActionMode
+        if target == .custom {
+            selectedPresetID = "custom"
+        } else {
+            selectedPresetID = target.defaultPresetID
+        }
     }
 
     private func handleIncomingEvent(_ event: SlapEvent) async {

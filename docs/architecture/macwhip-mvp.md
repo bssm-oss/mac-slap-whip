@@ -20,6 +20,12 @@ MacWhip은 OpenWhip의 핵심 상호작용을 Electron 없이 macOS Swift 네이
 - `MenuBarController`: `NSStatusItem + NSPopover`
 - `HUDWindowController`: non-activating HUD
 
+## Target Agent 의미
+
+- `Target Agent`는 transport 자체를 바꾸지 않습니다.
+- 대신 선택한 대상에 맞춰 **기본 프롬프트 프리셋**과 **권장 Action Mode**를 바꿉니다.
+- 모든 대상은 결국 포커스된 터미널 세션에 키보드 매크로를 주입하는 같은 경로를 사용합니다.
+
 ## 감지 파이프라인
 
 1. `MiyeonSlapPetAdapter`가 `AppleSPUHIDDevice` accelerometer report를 수신
@@ -31,4 +37,4 @@ MacWhip은 OpenWhip의 핵심 상호작용을 Electron 없이 macOS Swift 네이
 ## 현재 한계
 
 - 감지 하드웨어가 없는 Mac에서는 물리 감지가 불가능함
-- App bundle/signing/release packaging은 아직 없음
+- release ZIP은 제공하지만 notarization/signing은 아직 없음
