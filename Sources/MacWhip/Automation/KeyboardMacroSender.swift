@@ -28,7 +28,7 @@ struct KeyboardMacroSender: KeyboardMacroSending {
 
     func sendText(_ text: String) async throws {
         guard !text.isEmpty else { return }
-        try pasteText(text)
+        try await pasteText(text)
     }
 
     func sendReturn() async throws {
@@ -57,7 +57,7 @@ struct KeyboardMacroSender: KeyboardMacroSending {
         upEvent.post(tap: .cghidEventTap)
     }
 
-    private func pasteText(_ text: String) throws {
+    private func pasteText(_ text: String) async throws {
         let pasteboard = NSPasteboard.general
         let previousItems = pasteboard.pasteboardItems?.map { item in
             item.types.reduce(into: [NSPasteboard.PasteboardType: Data]()) { partialResult, type in
@@ -70,17 +70,16 @@ struct KeyboardMacroSender: KeyboardMacroSending {
         pasteboard.clearContents()
         pasteboard.setString(text, forType: .string)
 
-        defer {
-            pasteboard.clearContents()
-            for itemData in previousItems {
-                let item = NSPasteboardItem()
-                for (type, data) in itemData {
-                    item.setData(data, forType: type)
-                }
-                pasteboard.writeObjects([item])
-            }
-        }
-
         try postModifiedKey(.init(kVK_ANSI_V), modifiers: [.maskCommand])
+        try await Task.sleep(for: .milliseconds(200))
+
+        pasteboard.clearContents()
+        for itemData in previousItems {
+            let item = NSPasteboardItem()
+            for (type, data) in itemData {
+                item.setData(data, forType: type)
+            }
+            pasteboard.writeObjects([item])
+        }
     }
 }
