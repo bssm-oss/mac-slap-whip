@@ -22,7 +22,10 @@ let package = Package(
     targets: [
         .target(
             name: "MacWhipCore",
-            path: "Sources/MacWhip"
+            path: "Sources/MacWhip",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .executableTarget(
             name: "MacWhipApp",
