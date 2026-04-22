@@ -14,7 +14,15 @@ final class MenuBarController: NSObject {
 
     func start() {
         if let button = statusItem.button {
-            button.title = "🥁"
+            if let iconURL = Bundle.module.url(forResource: "MenuBarIconTemplate", withExtension: "png"),
+               let image = NSImage(contentsOf: iconURL) {
+                image.isTemplate = true
+                image.size = NSSize(width: 18, height: 18)
+                button.image = image
+                button.imagePosition = .imageOnly
+            } else {
+                button.title = "MW"
+            }
             button.toolTip = "MacWhip"
             button.target = self
             button.action = #selector(togglePopover(_:))
