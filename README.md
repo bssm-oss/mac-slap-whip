@@ -1,5 +1,7 @@
 # MacWhip
 
+![MacWhip Logo](Branding/MacWhipLogo.svg)
+
 MacWhip은 OpenWhip의 핵심 아이디어를 **Swift 네이티브 macOS 메뉴바 앱**으로 다시 만든 프로젝트입니다. 마우스로 채찍을 휘두르는 대신, **MacBook을 가볍게 탭하거나 노크했을 때** 현재 포커스된 AI 코딩 에이전트 터미널 세션으로 `Ctrl+C`와 짧은 재촉 문구를 보내도록 설계했습니다.
 
 이 프로젝트는 **Claude 전용 앱이 아닙니다.** Claude Code, Codex CLI, OpenCode CLI, 그리고 일반적인 터미널 기반 AI 에이전트 세션을 동일한 방식으로 다룹니다. 핵심 동작은 서비스 API 연동이 아니라 **포커스된 터미널에 키보드 인터럽트/문구를 주입하는 것**입니다.
@@ -72,7 +74,7 @@ swift build
 swift run MacWhip
 ```
 
-실행하면 메뉴바에 `🥁` 아이콘이 나타납니다.
+실행하면 메뉴바에 MacWhip 로고 아이콘이 나타납니다.
 
 ## 테스트 실행 방법
 
@@ -92,6 +94,12 @@ zsh scripts/package_release_zip.sh
 
 - `dist/MacWhip.app`
 - `dist/MacWhip.zip`
+
+## 브랜딩 자산
+
+- `Branding/MacWhipLogo.svg`: GitHub/문서용 로고
+- `Branding/AppIcon.icns`: macOS 앱 아이콘
+- `Sources/MacWhip/Resources/MenuBarIconTemplate.png`: 메뉴바 템플릿 아이콘
 
 ## 손쉬운 사용 권한 설정
 
