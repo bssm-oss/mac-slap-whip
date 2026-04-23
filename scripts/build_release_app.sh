@@ -10,6 +10,7 @@ CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
 BRANDING_DIR="$ROOT_DIR/Branding"
+HELPER_DIR="$ROOT_DIR/Helpers/MacWhipSlapHelper"
 
 mkdir -p "$ROOT_DIR/dist"
 
@@ -18,12 +19,15 @@ if [ ! -f "$BRANDING_DIR/AppIcon.icns" ] || [ ! -f "$ROOT_DIR/Sources/MacWhip/Re
 fi
 
 swift build -c release --product "$APP_NAME" --package-path "$ROOT_DIR"
+(cd "$HELPER_DIR" && go build -o "$ROOT_DIR/dist/MacWhipSlapHelper")
 
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
 cp "$ROOT_DIR/.build/release/$APP_NAME" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
+cp "$ROOT_DIR/dist/MacWhipSlapHelper" "$RESOURCES_DIR/MacWhipSlapHelper"
+chmod +x "$RESOURCES_DIR/MacWhipSlapHelper"
 cp "$BRANDING_DIR/AppIcon.icns" "$RESOURCES_DIR/AppIcon.icns"
 cp "$ROOT_DIR/Sources/MacWhip/Resources/MenuBarIconTemplate.png" "$RESOURCES_DIR/MenuBarIconTemplate.png"
 
@@ -63,5 +67,8 @@ cat > "$CONTENTS_DIR/Info.plist" <<EOF
 EOF
 
 printf 'APPL????' > "$CONTENTS_DIR/PkgInfo"
+
+codesign --force --sign - "$APP_DIR"
+codesign --verify --deep --strict "$APP_DIR"
 
 echo "Built app bundle at $APP_DIR"

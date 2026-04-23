@@ -5,7 +5,7 @@ import SwiftUI
 final class HUDWindowController {
     private lazy var panel: NSPanel = {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 360, height: 96),
+            contentRect: NSRect(x: 0, y: 0, width: 440, height: 156),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -21,15 +21,15 @@ final class HUDWindowController {
 
     private var hideTask: Task<Void, Never>?
 
-    func show(payload: HUDPayload, target: AgentTarget, actionMode: ActionMode) {
-        let rootView = TriggerHUDView(payload: payload, target: target, actionMode: actionMode)
+    func show(payload: HUDPayload) {
+        let rootView = TriggerHUDView(payload: payload)
         panel.contentViewController = NSHostingController(rootView: rootView)
         positionPanel()
         panel.orderFrontRegardless()
 
         hideTask?.cancel()
         hideTask = Task { [weak panel] in
-            try? await Task.sleep(for: .seconds(1.2))
+            try? await Task.sleep(for: .seconds(1.5))
             await MainActor.run {
                 panel?.orderOut(nil)
             }
@@ -39,7 +39,7 @@ final class HUDWindowController {
     private func positionPanel() {
         guard let screen = NSScreen.main else { return }
         let frame = screen.visibleFrame
-        let origin = NSPoint(x: frame.midX - 180, y: frame.maxY - 140)
+        let origin = NSPoint(x: frame.midX - 220, y: frame.maxY - 196)
         panel.setFrameOrigin(origin)
     }
 }
