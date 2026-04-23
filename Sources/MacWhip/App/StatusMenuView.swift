@@ -5,78 +5,57 @@ struct StatusMenuView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 6) {
-                Button(appState.isListening ? "감지 중지" : "감지 시작") {
-                    appState.toggleListening()
-                }
-                .buttonStyle(.borderedProminent)
+            QuickWhipCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("MACWHIP")
+                                .font(.system(size: 19, weight: .bold, design: .monospaced))
+                                .foregroundStyle(.white)
 
-                Text("현재 상태: \(appState.status.localizedDescription)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            GroupBox("대상 / 동작") {
-                VStack(alignment: .leading, spacing: 10) {
-                    Picker("대상 에이전트", selection: $appState.target) {
-                        ForEach(AgentTarget.allCases) { target in
-                            Text(target.localizedTitle).tag(target)
+                            Text(appState.selectedPhrase)
+                                .font(.system(size: 28, weight: .bold, design: .monospaced))
+                                .foregroundStyle(Color(red: 1.00, green: 0.62, blue: 0.04))
                         }
+
+                        Spacer()
+
+                        StatusBadge(
+                            text: appState.isListening ? "감지 중" : "대기",
+                            tint: appState.isListening
+                                ? Color(red: 0.19, green: 0.82, blue: 0.34)
+                                : Color.white.opacity(0.42)
+                        )
                     }
 
-                    Picker("동작 모드", selection: $appState.actionMode) {
-                        ForEach(ActionMode.allCases) { mode in
-                            Text(mode.localizedTitle).tag(mode)
-                        }
+                    Button(appState.isListening ? "감지 중지" : "감지 시작") {
+                        appState.toggleListening()
                     }
-
-                    Text(appState.target.guidanceText)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Toggle("포커스 앱 제한 해제", isOn: $appState.allowAnyFocusedApp)
-                        .font(.caption)
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color(red: 1.00, green: 0.62, blue: 0.04))
                 }
             }
 
-            GroupBox("프롬프트") {
+            QuickWhipCard {
                 VStack(alignment: .leading, spacing: 10) {
-                    Picker("프리셋 문구", selection: $appState.selectedPresetID) {
-                        ForEach(PhraseProvider.presets) { preset in
-                            Text(preset.localizedTitle).tag(preset.id)
-                        }
-                        Text("사용자 지정").tag("custom")
-                    }
+                    StatusRow(
+                        title: "현재 상태",
+                        value: appState.status.localizedDescription,
+                        tint: Color(red: 0.00, green: 0.48, blue: 1.00)
+                    )
+                    StatusRow(
+                        title: "손쉬운 사용",
+                        value: appState.accessibilityGranted ? "허용됨" : "필요",
+                        tint: appState.accessibilityGranted
+                            ? Color(red: 0.19, green: 0.82, blue: 0.34)
+                            : Color(red: 1.00, green: 0.23, blue: 0.19)
+                    )
+                    StatusRow(
+                        title: "물리 센서",
+                        value: appState.detectorStatusText,
+                        tint: Color(red: 1.00, green: 0.62, blue: 0.04)
+                    )
 
-                    if appState.target == .custom || appState.selectedPresetID == "custom" {
-                        TextField("사용자 지정 문구", text: $appState.customPhrase)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                }
-            }
-
-            GroupBox("튜닝") {
-                VStack(alignment: .leading, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("민감도 \(String(format: "%.2f", appState.sensitivity))")
-                            .font(.caption)
-                        Slider(value: $appState.sensitivity, in: 0.05...0.5)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("쿨다운 \(String(format: "%.1f", appState.cooldown))초")
-                            .font(.caption)
-                        Slider(value: $appState.cooldown, in: 0.75...3.0)
-                    }
-                }
-            }
-
-            GroupBox("권한 / 센서 상태") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("손쉬운 사용: \(appState.accessibilityGranted ? "허용됨" : "필요")")
-                        .font(.caption)
-                    Text("물리 센서: \(appState.detectorStatusText)")
-                        .font(.caption)
                     HStack {
                         Button("권한 확인") {
                             appState.refreshPermissions(prompt: true)
@@ -85,14 +64,41 @@ struct StatusMenuView: View {
                             appState.openAccessibilitySettings()
                         }
                     }
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
                 }
             }
 
+            QuickWhipCard {
+                DisclosureGroup("감도 / 쿨다운 조절") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("민감도 \(String(format: "%.2f", appState.sensitivity))")
+                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                .foregroundStyle(Color.white.opacity(0.70))
+                            Slider(value: $appState.sensitivity, in: 0.05...0.5)
+                                .tint(Color(red: 1.00, green: 0.62, blue: 0.04))
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("쿨다운 \(String(format: "%.1f", appState.cooldown))초")
+                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                .foregroundStyle(Color.white.opacity(0.70))
+                            Slider(value: $appState.cooldown, in: 0.75...3.0)
+                                .tint(Color(red: 0.00, green: 0.48, blue: 1.00))
+                        }
+                    }
+                    .padding(.top, 10)
+                }
+                .tint(Color.white)
+                .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                .foregroundStyle(.white)
+            }
+
             HStack {
-                Button("슬랩 테스트") {
+                Button("채찍 테스트") {
                     appState.triggerManualTest()
                 }
-                Button("최근 이벤트 보기") {
+                Button("최근 이벤트") {
                     appState.showRecentEvents()
                 }
                 Spacer()
@@ -100,8 +106,80 @@ struct StatusMenuView: View {
                     appState.quit()
                 }
             }
+            .font(.system(size: 12, weight: .medium, design: .monospaced))
         }
         .padding(14)
-        .frame(width: 360)
+        .frame(width: 392)
+        .background(Color(red: 0.13, green: 0.11, blue: 0.11))
+        .preferredColorScheme(.dark)
+    }
+}
+
+private struct QuickWhipCard<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            content
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(red: 0.19, green: 0.17, blue: 0.17))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+    }
+}
+
+private struct StatusBadge: View {
+    let text: String
+    let tint: Color
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            .foregroundStyle(tint)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(tint.opacity(0.12), in: Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(tint.opacity(0.26), lineWidth: 1)
+            )
+    }
+}
+
+private struct StatusRow: View {
+    let title: String
+    let value: String
+    let tint: Color
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text(title)
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundStyle(Color.white.opacity(0.54))
+                .frame(width: 76, alignment: .leading)
+
+            Text(value)
+                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+
+            Spacer(minLength: 0)
+
+            Circle()
+                .fill(tint)
+                .frame(width: 8, height: 8)
+                .shadow(color: tint.opacity(0.4), radius: 5)
+        }
     }
 }
