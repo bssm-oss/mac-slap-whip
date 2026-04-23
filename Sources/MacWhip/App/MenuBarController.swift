@@ -40,6 +40,7 @@ final class MenuBarController: NSObject {
             popover.performClose(sender)
         } else {
             appState.captureCurrentExternalTarget()
+            appState.refreshPermissions()
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
     }

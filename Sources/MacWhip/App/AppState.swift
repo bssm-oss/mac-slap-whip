@@ -7,17 +7,11 @@ import SwiftUI
 final class AppState: ObservableObject {
     @Published var isListening = false
     @Published var status: AppStatus = .idle
-    @Published var target: AgentTarget = .activeTerminal {
-        didSet {
-            applyTargetDefaults()
-        }
-    }
-    @Published var actionMode: ActionMode = .interruptAndPrompt
+    @Published private(set) var target: AgentTarget = .activeTerminal
+    @Published private(set) var actionMode: ActionMode = .interruptAndPrompt
     @Published var sensitivity: Double = 0.12
     @Published var cooldown: Double = 0.9
-    @Published var allowAnyFocusedApp = false
-    @Published var selectedPresetID = AgentTarget.activeTerminal.defaultPresetID
-    @Published var customPhrase = ""
+    @Published private(set) var allowAnyFocusedApp = false
     @Published var accessibilityGranted = false
     @Published var detectorStatusText = "미확인"
     @Published var lastHUDPayload: HUDPayload?
@@ -33,6 +27,7 @@ final class AppState: ObservableObject {
     private var eventSource: SlapEventSource?
     private var listenTask: Task<Void, Never>?
     private var lastExternalTarget: FrontmostAppInfo?
+    private var permissionRefreshTask: Task<Void, Never>?
 
     init(
         permissionManager: AccessibilityPermissionManaging = AccessibilityPermissionManager(),
@@ -46,14 +41,11 @@ final class AppState: ObservableObject {
         self.keyboardSender = keyboardSender
         self.hudController = hudController
         self.recentEventsController = recentEventsController ?? RecentEventsWindowController(eventLogStore: eventLogStore)
-        applyTargetDefaults()
         refreshPermissions()
         refreshDetectorStatus()
     }
 
-    var selectedPhrase: String {
-        PhraseProvider.phrase(for: selectedPresetID, customPhrase: customPhrase)
-    }
+    var selectedPhrase: String { PhraseProvider.quickWhipPhrase }
 
     func refreshPermissions(prompt: Bool = false) {
         accessibilityGranted = permissionManager.isTrusted(prompt: prompt)
@@ -61,6 +53,7 @@ final class AppState: ObservableObject {
 
     func openAccessibilitySettings() {
         permissionManager.openSystemSettings()
+        startPermissionRefreshLoop()
     }
 
     func captureCurrentExternalTarget() {
@@ -81,15 +74,14 @@ final class AppState: ObservableObject {
     func startListening() async {
         guard !isListening else { return }
         refreshPermissions()
-        let source = MiyeonSlapPetAdapter(configuration: .init(
+        let source = SlapMacReplicaEventSource(configuration: .init(
             sensitivityThreshold: sensitivity,
-            cooldown: cooldown,
-            baselineCalibrationDuration: 2.0
+            cooldown: cooldown
         ))
 
         do {
             try await source.start()
-            detectorStatusText = "물리 센서 연결됨"
+            detectorStatusText = "root slap helper 연결됨"
             eventSource = source
             isListening = true
             status = .listening
@@ -134,22 +126,29 @@ final class AppState: ObservableObject {
     }
 
     func refreshDetectorStatus() {
-        detectorStatusText = "대기 중"
+        detectorStatusText = SPUSensorProbe.summary()
     }
 
-    private func applyTargetDefaults() {
-        actionMode = target.defaultActionMode
-        if target == .custom {
-            selectedPresetID = "custom"
-        } else {
-            selectedPresetID = target.defaultPresetID
+    private func startPermissionRefreshLoop() {
+        permissionRefreshTask?.cancel()
+        permissionRefreshTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+
+            for _ in 0..<20 {
+                self.refreshPermissions()
+                if self.accessibilityGranted {
+                    return
+                }
+
+                try? await Task.sleep(for: .milliseconds(500))
+            }
         }
     }
 
     private func handleIncomingEvent(_ event: SlapEvent) async {
         guard debouncer.shouldAccept(at: event.timestamp, cooldown: cooldown) else {
             publishHUD(
-                HUDPayload(kind: .ignored, title: "무시됨", subtitle: "쿨다운 적용 중", intensity: event.intensity)
+                HUDPayload(kind: .ignored, title: "채찍 대기", subtitle: "쿨다운 적용 중입니다.", intensity: event.intensity)
             )
             return
         }
@@ -175,8 +174,8 @@ final class AppState: ObservableObject {
             status = isListening ? .listening : .idle
             let payload = HUDPayload(
                 kind: .success,
-                title: "SLAP detected",
-                subtitle: dispatchResult.message,
+                title: "채찍 발사",
+                subtitle: "\(dispatchResult.frontmostApp)에 \"\(selectedPhrase)\" 전송",
                 intensity: event.intensity
             )
             publishHUD(payload)
@@ -195,7 +194,7 @@ final class AppState: ObservableObject {
             status = .blocked(error.localizedDescription)
             let payload = HUDPayload(
                 kind: .blocked,
-                title: "실행 실패",
+                title: "채찍 실패",
                 subtitle: error.localizedDescription,
                 intensity: event.intensity
             )
@@ -216,6 +215,6 @@ final class AppState: ObservableObject {
 
     private func publishHUD(_ payload: HUDPayload) {
         lastHUDPayload = payload
-        hudController.show(payload: payload, target: target, actionMode: actionMode)
+        hudController.show(payload: payload)
     }
 }

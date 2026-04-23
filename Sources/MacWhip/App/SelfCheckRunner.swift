@@ -8,8 +8,7 @@ enum SelfCheckRunner {
         precondition(debouncer.shouldAccept(at: start, cooldown: 1.0))
         precondition(!debouncer.shouldAccept(at: start.addingTimeInterval(0.5), cooldown: 1.0))
         precondition(debouncer.shouldAccept(at: start.addingTimeInterval(1.2), cooldown: 1.0))
-        precondition(!PhraseProvider.phrase(for: "continue", customPhrase: "").isEmpty)
-        precondition(PhraseProvider.phrase(for: "custom", customPhrase: "hello") == "hello")
+        precondition(PhraseProvider.quickWhipPhrase == "더 빨리!!")
 
         let keyboard = SelfCheckKeyboardSender()
         let dispatcher = AgentCommandDispatcher(
@@ -24,9 +23,9 @@ enum SelfCheckRunner {
 
         let result = await dispatcher.performSlapAction(
             configuration: DispatchConfiguration(
-                target: .claude,
+                target: .activeTerminal,
                 actionMode: .interruptAndPrompt,
-                phrase: "Continue.",
+                phrase: PhraseProvider.quickWhipPhrase,
                 allowAnyFocusedApp: false,
                 fallbackTarget: nil
             ),
@@ -34,7 +33,7 @@ enum SelfCheckRunner {
         )
 
         precondition({
-            if case .success = result, keyboard.calls == ["ctrl+c", "text:Continue.", "return"] {
+            if case .success = result, keyboard.calls == ["ctrl+c", "text:\(PhraseProvider.quickWhipPhrase)", "return"] {
                 return true
             }
             return false
