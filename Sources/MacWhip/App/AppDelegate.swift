@@ -12,6 +12,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBarController?.start()
     }
 
+    func applicationDidBecomeActive(_ notification: Notification) {
+        appState.refreshPermissions()
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         appState.stopListening()
     }
